@@ -5,12 +5,19 @@
 #define BI_HDR_SIZE 40
 #define BMP_HDR_SIZE (BM_HDR_SIZE + BI_HDR_SIZE)
 
+#define CLAMP_TO_ZERO(val) do {if(val < 0) val = 0;} while (0)
+#define CLAMP_TO_255(val) do {if(val > 255) val = 255;} while (0)
+#define PIXEL(canvas, x, y) ((canvas).pixels[((canvas).height - y) * (canvas).width + (x)])
+
+static void blend_set_src(DiColor *dst, const DiColor *src);
+
 DiCanvas di_create_canvas(uint32_t width, uint32_t height, DiColor *pixels, void (*free)(void* pixels)){
     DiCanvas result = {
         .width = width,
         .height = height,
         .pixels = pixels,
-        .free = free
+        .free = free,
+        .blend_func = di_blend_func(DI_COUNT_BLEND_MODES),
     };
     return result;
 }
@@ -79,4 +86,42 @@ void di_clear(DiCanvas *canvas, DiColor color){
     for (uint64_t i = 0; i < canvas->width * canvas->height; i++){
         canvas->pixels[i] = color;
     }
+}
+
+void di_set_blend_mode(DiCanvas *canvas, DiBlend blend){
+    canvas->blend_func = di_blend_func(blend);
+}
+
+DiBlendFunc di_blend_func(DiBlend blend){
+    switch (blend){
+    case DI_BLEND_SET_SRC: return blend_set_src;
+    default: return blend_set_src;
+    }
+}
+
+void di_draw_rect(DiCanvas *canvas, DiPoint point, DiSize size, DiColor color){
+    CLAMP_TO_ZERO(point.x);
+    CLAMP_TO_ZERO(point.y);
+
+    DiSize fit = {
+        .w = canvas->width - point.x,
+        .h = canvas->height - point.y
+    };
+
+    fit.w = DI_MIN(fit.w, size.w);
+    fit.h = DI_MIN(fit.h, size.h);
+
+    for (uint64_t x = point.x; x < fit.w; x++){
+        for (uint64_t y = point.y; y < fit.h; y++){
+            DiColor *pixel = &PIXEL(*canvas, x, y);
+            canvas->blend_func(pixel, &color);
+        }
+    }
+}
+
+static void blend_set_src(DiColor *dst, const DiColor *src){
+    dst->r = src->r;
+    dst->g = src->g;
+    dst->b = src->b;
+    dst->a = src->a;
 }
