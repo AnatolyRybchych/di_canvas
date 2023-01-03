@@ -2,7 +2,10 @@
 #include <di_canvas.h>
 
 int main(void){
-    printf("hello world!\n");
+    DiCanvas canvas = di_alloc_canvas(800, 800);
 
-    return 0;
+    int err = di_dump_bmp(&canvas, "dump.bmp");
+    di_free_canvas(&canvas);
+
+    return err;
 }
