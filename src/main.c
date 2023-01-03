@@ -6,7 +6,7 @@ int main(void){
 
     di_clear(&canvas, (DiColor){.r = 0, .g = 0, .b = 0, .a = 255});
 
-    di_draw_rect(&canvas, DI_POINT(10, 10), DI_SIZE(100, 100), DI_COLOR_RED);
+    di_draw_rect(&canvas, DI_POINT(790, -10), DI_SIZE(100, 100), DI_COLOR_RED);
 
     int err = di_dump_bmp(&canvas, "dump.bmp");
     di_free_canvas(&canvas);

@@ -7,7 +7,7 @@
 
 #define CLAMP_TO_ZERO(val) do {if(val < 0) val = 0;} while (0)
 #define CLAMP_TO_255(val) do {if(val > 255) val = 255;} while (0)
-#define PIXEL(canvas, x, y) ((canvas).pixels[((canvas).height - y) * (canvas).width + (x)])
+#define PIXEL(canvas, x, y) ((canvas).pixels[((canvas).height - (y)) * (canvas).width + (x)])
 
 static void blend_set_src(DiColor *dst, const DiColor *src);
 static void blend_set_src_color(DiColor *dst, const DiColor *src);
@@ -104,20 +104,31 @@ DiBlendFunc di_blend_func(DiBlend blend){
 }
 
 void di_draw_rect(DiCanvas *canvas, DiPoint point, DiSize size, DiColor color){
-    CLAMP_TO_ZERO(point.x);
-    CLAMP_TO_ZERO(point.y);
+    if(point.x < 0){
+        if((uint32_t)-point.x > size.w) return;
+        size.w += point.x;
+        point.x = 0;
+    }
 
+    if(point.y < 0){
+        if((uint32_t)-point.y > size.h) return;
+        size.h += point.y;
+        point.y = 0;
+    }
+
+    int fw = (int)canvas->width - point.x;
+    int fh = (int)canvas->height - point.y;
     DiSize fit = {
-        .w = canvas->width - point.x,
-        .h = canvas->height - point.y
+        .w = fw > 0 ? fw : 0,
+        .h = fh > 0 ? fh : 0
     };
 
     fit.w = DI_MIN(fit.w, size.w);
     fit.h = DI_MIN(fit.h, size.h);
 
-    for (uint64_t x = point.x; x < fit.w; x++){
-        for (uint64_t y = point.y; y < fit.h; y++){
-            DiColor *pixel = &PIXEL(*canvas, x, y);
+    for (uint64_t x = 0; x < fit.w; x++){
+        for (uint64_t y = 0; y < fit.h; y++){
+            DiColor *pixel = &PIXEL(*canvas, x + point.x, y + point.y);
             canvas->blend_func(pixel, &color);
         }
     }
