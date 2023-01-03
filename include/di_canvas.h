@@ -19,6 +19,8 @@ void di_free_canvas(DiCanvas *canvas);
 //returns errno if feiled
 int di_dump_bmp(const DiCanvas *canvas, const char *filename);
 
+void di_clear(DiCanvas *canvas, DiColor color);
+
 struct DiCanvas{
     uint32_t width;
     uint32_t height;

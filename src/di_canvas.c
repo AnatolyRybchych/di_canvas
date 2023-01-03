@@ -65,7 +65,18 @@ int di_dump_bmp(const DiCanvas *canvas, const char *filename){
     __WRT(bi_colors);
     __WRT(bi_colors_important);
 
-    fwrite(canvas->pixels, sizeof(DiColor), canvas->width * canvas->height, file);
+    for (uint64_t i = 0; i < canvas->width * canvas->height; i++){
+        fwrite(&canvas->pixels[i].r, 1, 1, file);
+        fwrite(&canvas->pixels[i].a, 1, 1, file);
+        fwrite(&canvas->pixels[i].b, 1, 1, file);
+        fwrite(&canvas->pixels[i].g, 1, 1, file);
+    }
 
     return errno;
+}
+
+void di_clear(DiCanvas *canvas, DiColor color){
+    for (uint64_t i = 0; i < canvas->width * canvas->height; i++){
+        canvas->pixels[i] = color;
+    }
 }
