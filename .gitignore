@@ -6,3 +6,6 @@ run
 
 #object files
 obj/*
+
+#bitmap files
+*.bmp
