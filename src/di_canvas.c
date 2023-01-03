@@ -10,6 +10,8 @@
 #define PIXEL(canvas, x, y) ((canvas).pixels[((canvas).height - y) * (canvas).width + (x)])
 
 static void blend_set_src(DiColor *dst, const DiColor *src);
+static void blend_set_src_color(DiColor *dst, const DiColor *src);
+static void blend_set_src_alpha(DiColor *dst, const DiColor *src);
 
 DiCanvas di_create_canvas(uint32_t width, uint32_t height, DiColor *pixels, void (*free)(void* pixels)){
     DiCanvas result = {
@@ -95,6 +97,8 @@ void di_set_blend_mode(DiCanvas *canvas, DiBlend blend){
 DiBlendFunc di_blend_func(DiBlend blend){
     switch (blend){
     case DI_BLEND_SET_SRC: return blend_set_src;
+    case DI_BLEND_SET_SRC_COLOR: return blend_set_src_color;
+    case DI_BLEND_SET_SRC_ALPHA: return blend_set_src_alpha;
     default: return blend_set_src;
     }
 }
@@ -120,8 +124,16 @@ void di_draw_rect(DiCanvas *canvas, DiPoint point, DiSize size, DiColor color){
 }
 
 static void blend_set_src(DiColor *dst, const DiColor *src){
+    blend_set_src_color(dst, src);
+    blend_set_src_alpha(dst, src);
+}
+
+static void blend_set_src_color(DiColor *dst, const DiColor *src){
     dst->r = src->r;
     dst->g = src->g;
     dst->b = src->b;
+}
+
+static void blend_set_src_alpha(DiColor *dst, const DiColor *src){
     dst->a = src->a;
 }

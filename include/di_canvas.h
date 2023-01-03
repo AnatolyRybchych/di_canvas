@@ -31,7 +31,7 @@ typedef void (*DiFreeFunc)(void *pixels);
 //enum DiBlend
 typedef uint32_t DiBlend;
 
-DiCanvas di_create_canvas(uint32_t width, uint32_t height, DiColor *pixels, void (*free)(void* pixels));
+DiCanvas di_create_canvas(uint32_t width, uint32_t height, DiColor *pixels, DiFreeFunc free);
 
 //if canvas is NULL instantly returns
 void di_free_canvas(DiCanvas *canvas);
@@ -71,6 +71,8 @@ struct DiSize{
 
 enum DiBlend{
     DI_BLEND_SET_SRC,
+    DI_BLEND_SET_SRC_COLOR,
+    DI_BLEND_SET_SRC_ALPHA,
 
     DI_COUNT_BLEND_MODES,
 };
