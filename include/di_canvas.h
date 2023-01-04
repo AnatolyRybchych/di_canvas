@@ -13,11 +13,9 @@
 #define DI_MAX(a,b) (((a)>(b))?(a):(b))
 #define DI_SIGN(a) ((a) > 0 ? 1 : -1)
 #define DI_SWAP(a, b) do{typeof(a) tmp = (a); (a) = (b); (b) = tmp;}while(0)
+#define DI_IN_CANVAS_BOUNDS(canvas, x, y) ((x) < 0 || (x) >= (int64_t)(canvas).width || (y) < 0 || y >= (int64_t)(canvas).height)
 #define DI_PIXEL(canvas, x, y) ((canvas).pixels[((canvas).height - (y) - 1) * (canvas).width + (x)])
-#define DI_PIXEL_SAFE(canvas, x, y) (*(\
-    ((x) < 0 || (x) >= (int64_t)(canvas).width || (y) < 0 || y >= (int64_t)(canvas).height)\
-    ? di_trash_can()\
-    : &DI_PIXEL(canvas, x, y)))
+#define DI_PIXEL_SAFE(canvas, x, y) (*(DI_IN_CANVAS_BOUNDS(canvas, x, y) ? di_trash_can() : &DI_PIXEL(canvas, x, y)))
 
 #define DI_COLOR(red, green, blue, alpha) (DiColor){.r = red, .g = green, .b = blue, .a = alpha}
 #define DI_POINT(x, y) (DiPoint){x, y}
@@ -98,7 +96,6 @@ struct DiPointF{
 struct DiSizeF{
     float x, y;
 };
-
 
 enum DiBlend{
     DI_BLEND_SET_SRC,
