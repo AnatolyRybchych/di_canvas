@@ -142,7 +142,7 @@ void di_draw_line(DiCanvas *canvas, DiPoint p1, DiPoint p2, DiColor color){
 
     if(dx == 0){//draw vertical line
         for (int y = p1.y; y != p2.y + sy; y += sy){
-            canvas->blend_func(&DI_PIXEL(*canvas, p1.x, y), &color);
+            canvas->blend_func(&DI_PIXEL_SAFE(*canvas, p1.x, y), &color);
         }
     }
 
