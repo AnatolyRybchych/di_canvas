@@ -7,7 +7,6 @@
 
 #define CLAMP_TO_ZERO(val) do {if(val < 0) val = 0;} while (0)
 #define CLAMP_TO_255(val) do {if(val > 255) val = 255;} while (0)
-#define PIXEL(canvas, x, y) ((canvas).pixels[((canvas).height - (y)) * (canvas).width + (x)])
 
 static void blend_set_src(DiColor *dst, const DiColor *src);
 static void blend_set_src_color(DiColor *dst, const DiColor *src);
@@ -48,7 +47,7 @@ int di_dump_bmp(const DiCanvas *canvas, const char *filename){
     uint32_t bi_widht = canvas->width;
     uint32_t bi_height = canvas->height;
     uint16_t bi_color_plains = 1;
-    uint32_t bi_bits = 32;
+    uint16_t bi_bits = 32;
     uint32_t bi_compression = BI_RGB;
     uint32_t bi_data_size = canvas->width * canvas->height * sizeof(DiColor);
     int32_t  bi_ppm_horisontal = 2000;
@@ -75,10 +74,10 @@ int di_dump_bmp(const DiCanvas *canvas, const char *filename){
     __WRT(bi_colors_important);
 
     for (uint64_t i = 0; i < canvas->width * canvas->height; i++){
-        fwrite(&canvas->pixels[i].r, 1, 1, file);
-        fwrite(&canvas->pixels[i].a, 1, 1, file);
         fwrite(&canvas->pixels[i].b, 1, 1, file);
         fwrite(&canvas->pixels[i].g, 1, 1, file);
+        fwrite(&canvas->pixels[i].r, 1, 1, file);
+        fwrite(&canvas->pixels[i].a, 1, 1, file);
     }
 
     return errno;
@@ -128,10 +127,74 @@ void di_draw_rect(DiCanvas *canvas, DiPoint point, DiSize size, DiColor color){
 
     for (uint64_t x = 0; x < fit.w; x++){
         for (uint64_t y = 0; y < fit.h; y++){
-            DiColor *pixel = &PIXEL(*canvas, x + point.x, y + point.y);
+            DiColor *pixel = &DI_PIXEL(*canvas, x + point.x, y + point.y);
             canvas->blend_func(pixel, &color);
         }
     }
+}
+
+void di_draw_line(DiCanvas *canvas, DiPoint p1, DiPoint p2, DiColor color){
+    int dx = p2.x - p1.x;
+    int sx = DI_SIGN(dx);
+
+    int dy = p2.y - p1.y;
+    int sy = DI_SIGN(dy);
+
+    if(dx == 0){//draw vertical line
+        for (int y = p1.y; y != p2.y + sy; y += sy){
+            canvas->blend_func(&DI_PIXEL(*canvas, p1.x, y), &color);
+        }
+    }
+
+    int abs_dx = abs(dx);
+    int abs_dy = abs(dy);
+    int points_to_draw = DI_MAX(abs_dx, abs_dy);
+
+    int x = p1.x;
+    int y = p1.y;
+
+    int b = y - x * dy / dx;
+
+    while (points_to_draw){
+        canvas->blend_func(&DI_PIXEL_SAFE(*canvas, x, y), &color);
+
+        int xn = x + sx;
+        int yn = xn * dy / dx  + b;
+
+        int offset_yn = abs(y - yn);
+
+        if(offset_yn == 0){
+            x += sx;
+        }
+        else if(offset_yn == 1){
+            y += sy;
+            x += sx;
+        }
+        else{
+            y += sy;
+        }
+        points_to_draw --;
+    }
+}
+
+DiPoint *di_nearest_to(const DiPoint *target, DiPoint *p1, DiPoint *p2){
+    int dp1x = target->x - p1->x; 
+    int dp1y = target->y - p1->y;
+
+    int dp2x = target->x - p2->x; 
+    int dp2y = target->y - p2->y;
+
+    if((dp1x * dp1x + dp1y * dp1y) > (dp2x * dp2x + dp2y * dp2y)){
+        return p2;
+    }
+    else{
+        return p1;
+    }
+}
+
+DiColor *di_trash_can(void){
+    static DiColor trash;
+    return &trash;
 }
 
 static void blend_set_src(DiColor *dst, const DiColor *src){
