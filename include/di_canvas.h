@@ -61,8 +61,14 @@ void di_draw_rect(DiCanvas *canvas, DiPoint p1, DiSize size, DiColor color);
 //canvas cannot be NULL
 void di_draw_line(DiCanvas *canvas, DiPoint p1, DiPoint p2, DiColor color);
 
+//canvas cannot be NULL
+void di_draw_triangle(DiCanvas *canvas, DiPoint p1, DiPoint p2, DiPoint p3, DiColor color);
+
 //target, p1 and p2 cannot be NULL
 DiPoint *di_nearest_to(const DiPoint *target, DiPoint *p1, DiPoint *p2);
+void di_enum_line_points(DiPoint p1, DiPoint p2, void (*enum_proc)(int x, int y, void *data), void *data);
+void di_enum_line_points_unique_x(DiPoint p1, DiPoint p2, void (*enum_proc)(int x, int y, void *data), void *data);
+
 DiColor *di_trash_can(void);
 
 struct DiCanvas{

@@ -12,8 +12,6 @@ static void blend_set_src(DiColor *dst, const DiColor *src);
 static void blend_set_src_color(DiColor *dst, const DiColor *src);
 static void blend_set_src_alpha(DiColor *dst, const DiColor *src);
 
-static void enum_line_points(DiPoint p1, DiPoint p2, void (*enum_proc)(int x, int y, void *data), void *data);
-
 DiCanvas di_create_canvas(uint32_t width, uint32_t height, DiColor *pixels, void (*free)(void* pixels)){
     DiCanvas result = {
         .width = width,
@@ -149,7 +147,16 @@ void di_draw_line(DiCanvas *canvas, DiPoint p1, DiPoint p2, DiColor color){
         [1] = &color,
     };
     
-    enum_line_points(p1, p2, __draw_point, a);
+    di_enum_line_points(p1, p2, __draw_point, a);
+}
+
+void di_draw_triangle(DiCanvas *canvas, DiPoint p1, DiPoint p2, DiPoint p3, DiColor color){
+    
+    canvas = canvas;
+    p1 = p1;
+    p2 = p2;
+    p3 = p3;
+    color = color;
 }
 
 DiPoint *di_nearest_to(const DiPoint *target, DiPoint *p1, DiPoint *p2){
@@ -167,27 +174,7 @@ DiPoint *di_nearest_to(const DiPoint *target, DiPoint *p1, DiPoint *p2){
     }
 }
 
-DiColor *di_trash_can(void){
-    static DiColor trash;
-    return &trash;
-}
-
-static void blend_set_src(DiColor *dst, const DiColor *src){
-    blend_set_src_color(dst, src);
-    blend_set_src_alpha(dst, src);
-}
-
-static void blend_set_src_color(DiColor *dst, const DiColor *src){
-    dst->r = src->r;
-    dst->g = src->g;
-    dst->b = src->b;
-}
-
-static void blend_set_src_alpha(DiColor *dst, const DiColor *src){
-    dst->a = src->a;
-}
-
-static void enum_line_points(DiPoint p1, DiPoint p2, void (*enum_proc)(int x, int y, void *data), void *data){
+void di_enum_line_points(DiPoint p1, DiPoint p2, void (*enum_proc)(int x, int y, void *data), void *data){
     int dx = p2.x - p1.x;
     int sx = DI_SIGN(dx);
 
@@ -230,4 +217,42 @@ static void enum_line_points(DiPoint p1, DiPoint p2, void (*enum_proc)(int x, in
         }
         points_to_draw --;
     }
+}
+
+void di_enum_line_points_unique_x(DiPoint p1, DiPoint p2, void (*enum_proc)(int x, int y, void *data), void *data){
+    int dx = p2.x - p1.x;
+    int sx = DI_SIGN(dx);
+    int dy = p2.y - p1.y;
+    
+    int b = p1.y - p1.x * dy / dx;
+
+    if(dx == 0){//draw vertical line
+        enum_proc(p1.x, p1.y, data);
+        return;
+    }
+
+    do{
+        enum_proc(p1.x, dy * p1.x / dx + b, data);
+        p1.x += sx;
+    } while(p1.x != p2.x);
+}
+
+DiColor *di_trash_can(void){
+    static DiColor trash;
+    return &trash;
+}
+
+static void blend_set_src(DiColor *dst, const DiColor *src){
+    blend_set_src_color(dst, src);
+    blend_set_src_alpha(dst, src);
+}
+
+static void blend_set_src_color(DiColor *dst, const DiColor *src){
+    dst->r = src->r;
+    dst->g = src->g;
+    dst->b = src->b;
+}
+
+static void blend_set_src_alpha(DiColor *dst, const DiColor *src){
+    dst->a = src->a;
 }
