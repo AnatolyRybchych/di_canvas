@@ -150,13 +150,44 @@ void di_draw_line(DiCanvas *canvas, DiPoint p1, DiPoint p2, DiColor color){
     di_enum_line_points(p1, p2, __draw_point, a);
 }
 
-void di_draw_triangle(DiCanvas *canvas, DiPoint p1, DiPoint p2, DiPoint p3, DiColor color){
+static void __draw_line(int x, int y, void *data){
+    void **a = data;
     
-    canvas = canvas;
-    p1 = p1;
-    p2 = p2;
-    p3 = p3;
-    color = color;
+    DiCanvas *canvas = a[0];
+    DiColor *color = a[1];
+    int *dx = a[2];
+    int *dy = a[3];
+    int *b = a[4];
+
+    int end_y = *dy * x / *dx + *b;
+    int inc = y > end_y ? -1 : 1;
+
+    while (y != end_y){
+        canvas->blend_func(&DI_PIXEL_SAFE(*canvas, x, y), color); 
+        y += inc;
+    }
+    canvas->blend_func(&DI_PIXEL_SAFE(*canvas, x, y), color); 
+}
+
+void di_draw_triangle(DiCanvas *canvas, DiPoint p1, DiPoint p2, DiPoint p3, DiColor color){
+    if(p2.x < p1.x) DI_SWAP(p1, p2);
+    if(p3.x < p2.x) DI_SWAP(p2, p3);
+    if(p2.x < p1.x) DI_SWAP(p1, p2);
+
+    int dx = p3.x - p1.x;
+    int dy = p3.y - p1.y;
+    int b = p1.y - p1.x * dy / dx;
+
+    void *a[] = {
+        [0] = canvas,
+        [1] = &color,
+        [2] = &dx,
+        [3] = &dy,
+        [4] = &b,
+    };
+
+    di_enum_line_points_unique_x(p1, p2, __draw_line, a);
+    di_enum_line_points_unique_x(p2, p3, __draw_line, a);
 }
 
 DiPoint *di_nearest_to(const DiPoint *target, DiPoint *p1, DiPoint *p2){
