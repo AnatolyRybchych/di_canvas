@@ -32,6 +32,9 @@ void di_free_canvas(DiCanvas *canvas){
 }
 
 int di_dump_bmp(const DiCanvas *canvas, const char *filename){
+    assert(canvas != NULL);
+    assert(filename != NULL);
+
     errno = 0;
     FILE *file = fopen(filename, "w");
     if(errno != 0){
@@ -103,6 +106,7 @@ DiBlendFunc di_blend_func(DiBlend blend){
 }
 
 void di_draw_rect(DiCanvas *canvas, DiPoint point, DiSize size, DiColor color){
+    assert(canvas != NULL);
     if(point.x < 0){
         if((uint32_t)-point.x > size.w) return;
         size.w += point.x;
@@ -172,6 +176,7 @@ static void __draw_line(int x, int y, void *data){
 }
 
 void di_draw_triangle(DiCanvas *canvas, DiPoint p1, DiPoint p2, DiPoint p3, DiColor color){
+    assert(canvas != NULL);
     if(p2.x < p1.x) DI_SWAP(p1, p2);
     if(p3.x < p2.x) DI_SWAP(p2, p3);
     if(p2.x < p1.x) DI_SWAP(p1, p2);
@@ -195,6 +200,10 @@ void di_draw_triangle(DiCanvas *canvas, DiPoint p1, DiPoint p2, DiPoint p3, DiCo
 }
 
 DiPoint *di_nearest_to(const DiPoint *target, DiPoint *p1, DiPoint *p2){
+    assert(target != NULL);
+    assert(p1 != NULL);
+    assert(p2 != NULL);
+
     int dp1x = target->x - p1->x; 
     int dp1y = target->y - p1->y;
 
@@ -210,6 +219,8 @@ DiPoint *di_nearest_to(const DiPoint *target, DiPoint *p1, DiPoint *p2){
 }
 
 void di_enum_line_points(DiPoint p1, DiPoint p2, void (*enum_proc)(int x, int y, void *data), void *data){
+    assert(enum_proc != NULL);
+
     int dx = p2.x - p1.x;
     int dy = p2.y - p1.y;
 
@@ -222,6 +233,8 @@ void di_enum_line_points(DiPoint p1, DiPoint p2, void (*enum_proc)(int x, int y,
 }
 
 void di_enum_line_points_unique_x(DiPoint p1, DiPoint p2, void (*enum_proc)(int x, int y, void *data), void *data){
+    assert(enum_proc != NULL);
+
     int dx = p2.x - p1.x;
     int sx = DI_SIGN(dx);
     int dy = p2.y - p1.y;
@@ -240,6 +253,8 @@ void di_enum_line_points_unique_x(DiPoint p1, DiPoint p2, void (*enum_proc)(int 
 }
 
 void di_enum_line_points_unique_y(DiPoint p1, DiPoint p2, void (*enum_proc)(int x, int y, void *data), void *data){
+    assert(enum_proc != NULL);
+    
     int dx = p2.x - p1.x;
     int dy = p2.y - p1.y;
     int sy = DI_SIGN(dy);

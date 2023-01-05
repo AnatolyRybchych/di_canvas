@@ -8,6 +8,7 @@
 #include <math.h>
 #include <stddef.h>
 #include <stdbool.h>
+#include <assert.h>
 
 #define DI_MIN(a,b) (((a)<(b))?(a):(b))
 #define DI_MAX(a,b) (((a)>(b))?(a):(b))
