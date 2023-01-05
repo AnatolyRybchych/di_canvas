@@ -211,46 +211,13 @@ DiPoint *di_nearest_to(const DiPoint *target, DiPoint *p1, DiPoint *p2){
 
 void di_enum_line_points(DiPoint p1, DiPoint p2, void (*enum_proc)(int x, int y, void *data), void *data){
     int dx = p2.x - p1.x;
-    int sx = DI_SIGN(dx);
-
     int dy = p2.y - p1.y;
-    int sy = DI_SIGN(dy);
 
-    if(dx == 0){//draw vertical line
-        for (int y = p1.y; y != p2.y + sy; y += sy){
-            enum_proc(p1.x, y, data);
-        }
-        return;
+    if (dx < dy){
+        di_enum_line_points_unique_y(p1, p2, enum_proc, data);
     }
-
-    int abs_dx = abs(dx);
-    int abs_dy = abs(dy);
-    int points_to_draw = DI_MAX(abs_dx, abs_dy);
-
-    int x = p1.x;
-    int y = p1.y;
-
-    int b = y - x * dy / dx;
-
-    while (points_to_draw){
-        enum_proc(x, y, data);
-
-        int xn = x + sx;
-        int yn = xn * dy / dx  + b;
-
-        int offset_yn = abs(y - yn);
-
-        if(offset_yn == 0){
-            x += sx;
-        }
-        else if(offset_yn == 1){
-            y += sy;
-            x += sx;
-        }
-        else{
-            y += sy;
-        }
-        points_to_draw --;
+    else{
+        di_enum_line_points_unique_x(p1, p2, enum_proc, data);
     }
 }
 
@@ -261,7 +228,7 @@ void di_enum_line_points_unique_x(DiPoint p1, DiPoint p2, void (*enum_proc)(int 
     
     int b = p1.y - p1.x * dy / dx;
 
-    if(dx == 0){//draw vertical line
+    if(dx == 0){
         enum_proc(p1.x, p1.y, data);
         return;
     }
@@ -270,6 +237,26 @@ void di_enum_line_points_unique_x(DiPoint p1, DiPoint p2, void (*enum_proc)(int 
         enum_proc(p1.x, dy * p1.x / dx + b, data);
         p1.x += sx;
     } while(p1.x != p2.x);
+}
+
+void di_enum_line_points_unique_y(DiPoint p1, DiPoint p2, void (*enum_proc)(int x, int y, void *data), void *data){
+    int dx = p2.x - p1.x;
+    int dy = p2.y - p1.y;
+    int sy = DI_SIGN(dy);
+    
+    int b = p1.y - p1.x * dy / dx;
+
+    if(dy == 0){
+        enum_proc(p1.x, p1.y, data);
+        return;
+    }
+
+    do{
+        //y = k * x + b
+        //x = (y - b) / k
+        enum_proc((p1.y - b) * dx / dy, p1.y, data);
+        p1.y += sy;
+    } while(p1.y != p2.y);
 }
 
 DiColor *di_trash_can(void){

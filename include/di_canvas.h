@@ -66,8 +66,14 @@ void di_draw_triangle(DiCanvas *canvas, DiPoint p1, DiPoint p2, DiPoint p3, DiCo
 
 //target, p1 and p2 cannot be NULL
 DiPoint *di_nearest_to(const DiPoint *target, DiPoint *p1, DiPoint *p2);
+
 void di_enum_line_points(DiPoint p1, DiPoint p2, void (*enum_proc)(int x, int y, void *data), void *data);
+
+//y = kx + b for each x
 void di_enum_line_points_unique_x(DiPoint p1, DiPoint p2, void (*enum_proc)(int x, int y, void *data), void *data);
+
+//x = (y - b) / k for each y
+void di_enum_line_points_unique_y(DiPoint p1, DiPoint p2, void (*enum_proc)(int x, int y, void *data), void *data);
 
 DiColor *di_trash_can(void);
 
