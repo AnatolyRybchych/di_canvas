@@ -12,6 +12,8 @@ static void blend_set_src(DiColor *dst, const DiColor *src);
 static void blend_set_src_color(DiColor *dst, const DiColor *src);
 static void blend_set_src_alpha(DiColor *dst, const DiColor *src);
 
+static void enum_line_points(DiPoint p1, DiPoint p2, void (*enum_proc)(int x, int y, void *data), void *data);
+
 DiCanvas di_create_canvas(uint32_t width, uint32_t height, DiColor *pixels, void (*free)(void* pixels)){
     DiCanvas result = {
         .width = width,
@@ -133,49 +135,21 @@ void di_draw_rect(DiCanvas *canvas, DiPoint point, DiSize size, DiColor color){
     }
 }
 
+static void __draw_point(int x, int y, void *data){
+    void **a = data;
+    DiCanvas *canvas = a[0];
+    DiColor *color = a[1];
+
+    canvas->blend_func(&DI_PIXEL_SAFE(*canvas, x, y), color); 
+}
+
 void di_draw_line(DiCanvas *canvas, DiPoint p1, DiPoint p2, DiColor color){
-    int dx = p2.x - p1.x;
-    int sx = DI_SIGN(dx);
-
-    int dy = p2.y - p1.y;
-    int sy = DI_SIGN(dy);
-
-    if(dx == 0){//draw vertical line
-        for (int y = p1.y; y != p2.y + sy; y += sy){
-            canvas->blend_func(&DI_PIXEL_SAFE(*canvas, p1.x, y), &color);
-        }
-        return false;
-    }
-
-    int abs_dx = abs(dx);
-    int abs_dy = abs(dy);
-    int points_to_draw = DI_MAX(abs_dx, abs_dy);
-
-    int x = p1.x;
-    int y = p1.y;
-
-    int b = y - x * dy / dx;
-
-    while (points_to_draw){
-        canvas->blend_func(&DI_PIXEL_SAFE(*canvas, x, y), &color);
-
-        int xn = x + sx;
-        int yn = xn * dy / dx  + b;
-
-        int offset_yn = abs(y - yn);
-
-        if(offset_yn == 0){
-            x += sx;
-        }
-        else if(offset_yn == 1){
-            y += sy;
-            x += sx;
-        }
-        else{
-            y += sy;
-        }
-        points_to_draw --;
-    }
+    void *a[] = {
+        [0] = canvas,
+        [1] = &color,
+    };
+    
+    enum_line_points(p1, p2, __draw_point, a);
 }
 
 DiPoint *di_nearest_to(const DiPoint *target, DiPoint *p1, DiPoint *p2){
@@ -211,4 +185,49 @@ static void blend_set_src_color(DiColor *dst, const DiColor *src){
 
 static void blend_set_src_alpha(DiColor *dst, const DiColor *src){
     dst->a = src->a;
+}
+
+static void enum_line_points(DiPoint p1, DiPoint p2, void (*enum_proc)(int x, int y, void *data), void *data){
+    int dx = p2.x - p1.x;
+    int sx = DI_SIGN(dx);
+
+    int dy = p2.y - p1.y;
+    int sy = DI_SIGN(dy);
+
+    if(dx == 0){//draw vertical line
+        for (int y = p1.y; y != p2.y + sy; y += sy){
+            enum_proc(p1.x, y, data);
+        }
+        return;
+    }
+
+    int abs_dx = abs(dx);
+    int abs_dy = abs(dy);
+    int points_to_draw = DI_MAX(abs_dx, abs_dy);
+
+    int x = p1.x;
+    int y = p1.y;
+
+    int b = y - x * dy / dx;
+
+    while (points_to_draw){
+        enum_proc(x, y, data);
+
+        int xn = x + sx;
+        int yn = xn * dy / dx  + b;
+
+        int offset_yn = abs(y - yn);
+
+        if(offset_yn == 0){
+            x += sx;
+        }
+        else if(offset_yn == 1){
+            y += sy;
+            x += sx;
+        }
+        else{
+            y += sy;
+        }
+        points_to_draw --;
+    }
 }
