@@ -144,6 +144,7 @@ void di_draw_line(DiCanvas *canvas, DiPoint p1, DiPoint p2, DiColor color){
         for (int y = p1.y; y != p2.y + sy; y += sy){
             canvas->blend_func(&DI_PIXEL_SAFE(*canvas, p1.x, y), &color);
         }
+        return false;
     }
 
     int abs_dx = abs(dx);
