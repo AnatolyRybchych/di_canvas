@@ -150,11 +150,13 @@ void di_draw_line(DiCanvas *canvas, DiPoint p1, DiPoint p2, DiColor color){
     di_enum_line_points(p1, p2, __draw_point, a);
 }
 
+//!!!dx cannot be 0
 static void __draw_line(int x, int y, void *data){
     void **a = data;
     
     DiCanvas *canvas = a[0];
     DiColor *color = a[1];
+
     int *dx = a[2];
     int *dy = a[3];
     int *b = a[4];
@@ -175,6 +177,8 @@ void di_draw_triangle(DiCanvas *canvas, DiPoint p1, DiPoint p2, DiPoint p3, DiCo
     if(p2.x < p1.x) DI_SWAP(p1, p2);
 
     int dx = p3.x - p1.x;
+    if(dx == 0) return;
+    
     int dy = p3.y - p1.y;
     int b = p1.y - p1.x * dy / dx;
 
