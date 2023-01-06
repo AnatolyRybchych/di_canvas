@@ -68,6 +68,7 @@ static DiColor calc_blur_pixel_color(const DiCanvas *canvas, int x, int y, uint8
 
 DiCanvas di_create_canvas_copy_blured(DiColor *pixels, DiFreeFunc free, const DiCanvas *src, uint8_t blur_radius){
     assert(blur_radius <= 5);// blur is extremely slow (O^2) 
+    assert(pixels != NULL);
     DiCanvas result = di_create_canvas(src->width, src->height, pixels, free);
 
     for (unsigned x = 0; x < src->width; x++){
@@ -143,12 +144,16 @@ int di_dump_bmp(const DiCanvas *canvas, const char *filename){
 }
 
 void di_clear(DiCanvas *canvas, DiColor color){
+    assert(canvas != NULL);
+
     for (uint64_t i = 0; i < canvas->width * canvas->height; i++){
         canvas->pixels[i] = color;
     }
 }
 
 void di_set_blend_mode(DiCanvas *canvas, DiBlend blend){
+    assert(canvas != NULL);
+
     canvas->blend_func = di_blend_func(blend);
 }
 
@@ -163,6 +168,7 @@ DiBlendFunc di_blend_func(DiBlend blend){
 
 void di_draw_rect(DiCanvas *canvas, DiPoint point, DiSize size, DiColor color){
     assert(canvas != NULL);
+
     if(point.x < 0){
         if((uint32_t)-point.x > size.w) return;
         size.w += point.x;
@@ -202,6 +208,8 @@ static void __draw_point(int x, int y, void *data){
 }
 
 void di_draw_line(DiCanvas *canvas, DiPoint p1, DiPoint p2, DiColor color){
+    assert(canvas != NULL);
+
     void *a[] = {
         [0] = canvas,
         [1] = &color,
@@ -233,6 +241,7 @@ static void __draw_line(int x, int y, void *data){
 
 void di_draw_triangle(DiCanvas *canvas, DiPoint p1, DiPoint p2, DiPoint p3, DiColor color){
     assert(canvas != NULL);
+    
     if(p2.x < p1.x) DI_SWAP(p1, p2);
     if(p3.x < p2.x) DI_SWAP(p2, p3);
     if(p2.x < p1.x) DI_SWAP(p1, p2);

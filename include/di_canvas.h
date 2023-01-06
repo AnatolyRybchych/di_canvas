@@ -48,6 +48,7 @@ DiCanvas di_create_canvas(uint32_t width, uint32_t height, DiColor *pixels, DiFr
 
 DiCanvas di_create_canvas_copy(DiColor *pixels, DiFreeFunc free, const DiCanvas *src);
 
+//blur_radius <= 5
 DiCanvas di_create_canvas_copy_blured(DiColor *pixels, DiFreeFunc free, const DiCanvas *src, uint8_t blur_radius);
 
 //if canvas is NULL instantly returns
