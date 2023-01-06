@@ -65,6 +65,9 @@ void di_draw_line(DiCanvas *canvas, DiPoint p1, DiPoint p2, DiColor color);
 //canvas cannot be NULL
 void di_draw_triangle(DiCanvas *canvas, DiPoint p1, DiPoint p2, DiPoint p3, DiColor color);
 
+//canvas cannot be NULL
+void di_stroke_circle(DiCanvas *canvas, DiPoint p, uint32_t r, DiColor color);
+
 //target, p1 and p2 cannot be NULL
 DiPoint *di_nearest_to(const DiPoint *target, DiPoint *p1, DiPoint *p2);
 

@@ -199,6 +199,35 @@ void di_draw_triangle(DiCanvas *canvas, DiPoint p1, DiPoint p2, DiPoint p3, DiCo
     di_enum_line_points_unique_x(p2, p3, __draw_line, a);
 }
 
+void di_stroke_circle(DiCanvas *canvas, DiPoint p, uint32_t r, DiColor color){
+    assert(canvas != NULL);
+
+    //x**2 + y**2 = r**2
+    //y**2 = r**2 - x**2
+
+    int r_3_4 = (int)r*3/4;
+    
+    for (int circle_x = -r_3_4; circle_x <= r_3_4; circle_x++){
+        int circle_y = sqrtf(r*r - circle_x*circle_x);
+        int x = circle_x + p.x;
+        int y1 = circle_y + p.y;
+        int y2 = -circle_y + p.y;
+
+        canvas->blend_func(&DI_PIXEL_SAFE(*canvas, x, y1), &color);
+        canvas->blend_func(&DI_PIXEL_SAFE(*canvas, x, y2), &color);
+    }
+
+    for (int circle_y = -r_3_4; circle_y <= r_3_4; circle_y++){
+        int circle_x = sqrtf(r*r - circle_y*circle_y);
+        int y = circle_y + p.y;
+        int x1 = circle_x + p.x;
+        int x2 = -circle_x + p.x;
+
+        canvas->blend_func(&DI_PIXEL_SAFE(*canvas, x1, y), &color);
+        canvas->blend_func(&DI_PIXEL_SAFE(*canvas, x2, y), &color);
+    }
+}
+
 DiPoint *di_nearest_to(const DiPoint *target, DiPoint *p1, DiPoint *p2){
     assert(target != NULL);
     assert(p1 != NULL);
@@ -254,7 +283,7 @@ void di_enum_line_points_unique_x(DiPoint p1, DiPoint p2, void (*enum_proc)(int 
 
 void di_enum_line_points_unique_y(DiPoint p1, DiPoint p2, void (*enum_proc)(int x, int y, void *data), void *data){
     assert(enum_proc != NULL);
-    
+
     int dx = p2.x - p1.x;
     int dy = p2.y - p1.y;
     int sy = DI_SIGN(dy);
