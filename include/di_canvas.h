@@ -30,6 +30,7 @@
 
 #define di_alloc_canvas(width, height) di_create_canvas(width, height, malloc(width * height * sizeof(DiColor)), free)
 #define di_alloc_canvas_copy(src) di_create_canvas_copy(malloc((src)->width * (src)->height * sizeof(DiColor)), free, src)
+#define di_alloc_canvas_copy_blured(src, blur_radius) di_create_canvas_copy_blured(malloc((src)->width * (src)->height * sizeof(DiColor)), free, src, blur_radius)
 
 typedef struct DiCanvas DiCanvas;
 typedef struct DiColor DiColor;
@@ -46,6 +47,8 @@ typedef uint32_t DiBlend;
 DiCanvas di_create_canvas(uint32_t width, uint32_t height, DiColor *pixels, DiFreeFunc free);
 
 DiCanvas di_create_canvas_copy(DiColor *pixels, DiFreeFunc free, const DiCanvas *src);
+
+DiCanvas di_create_canvas_copy_blured(DiColor *pixels, DiFreeFunc free, const DiCanvas *src, uint8_t blur_radius);
 
 //if canvas is NULL instantly returns
 void di_free_canvas(DiCanvas *canvas);

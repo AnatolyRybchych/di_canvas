@@ -33,6 +33,52 @@ DiCanvas di_create_canvas_copy(DiColor *pixels, DiFreeFunc free, const DiCanvas 
     return result;
 }
 
+static DiColor calc_blur_pixel_color(const DiCanvas *canvas, int x, int y, uint8_t blur_radius){
+    int start_x = DI_MAX(x - blur_radius, 0);
+    int start_y = DI_MAX(y - blur_radius, 0);
+
+    int end_x = DI_MIN(canvas->width, (unsigned)x + blur_radius);
+    int end_y = DI_MIN(canvas->height, (unsigned)y + blur_radius);
+
+    uint64_t color_amount[4] = {0, 0, 0, 0};
+    int cnt = (end_x - start_x) * (end_y - start_y);
+    
+    if(cnt == 0){
+        return DI_PIXEL(*canvas, x, y);
+    }
+
+    for (int cur_x = start_x; cur_x < end_x; cur_x++){
+        for (int cur_y = start_y; cur_y < end_y; cur_y++){
+            const DiColor pixel = DI_PIXEL(*canvas, cur_x, cur_y);
+
+            color_amount[0] += pixel.r; 
+            color_amount[1] += pixel.g; 
+            color_amount[2] += pixel.b; 
+            color_amount[3] += pixel.a; 
+        }
+    }
+    
+    return DI_COLOR(
+        color_amount[0] / cnt,
+        color_amount[1] / cnt,
+        color_amount[2] / cnt,
+        color_amount[3] / cnt
+    );
+}
+
+DiCanvas di_create_canvas_copy_blured(DiColor *pixels, DiFreeFunc free, const DiCanvas *src, uint8_t blur_radius){
+    assert(blur_radius <= 5);// blur is extremely slow (O^2) 
+    DiCanvas result = di_create_canvas(src->width, src->height, pixels, free);
+
+    for (unsigned x = 0; x < src->width; x++){
+        for (unsigned y = 0; y < src->height; y++){
+            DI_PIXEL(result, x, y) = calc_blur_pixel_color(src, x, y, blur_radius);
+        }
+    }
+
+    return result;
+}
+
 void di_free_canvas(DiCanvas *canvas){
     if(canvas == NULL) return;
 
