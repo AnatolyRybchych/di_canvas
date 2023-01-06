@@ -13,6 +13,8 @@ static void blend_set_src_color(DiColor *dst, const DiColor *src);
 static void blend_set_src_alpha(DiColor *dst, const DiColor *src);
 
 DiCanvas di_create_canvas(uint32_t width, uint32_t height, DiColor *pixels, void (*free)(void* pixels)){
+    assert(pixels != NULL);
+
     DiCanvas result = {
         .width = width,
         .height = height,
@@ -20,6 +22,14 @@ DiCanvas di_create_canvas(uint32_t width, uint32_t height, DiColor *pixels, void
         .free = free,
         .blend_func = di_blend_func(DI_COUNT_BLEND_MODES),
     };
+    return result;
+}
+
+DiCanvas di_create_canvas_copy(DiColor *pixels, DiFreeFunc free, const DiCanvas *src){
+    DiCanvas result = di_create_canvas(src->width, src->height, pixels, free);
+    memcpy(result.pixels, src->pixels, src->width * src->height * sizeof(DiColor));
+    result.blend_func = src->blend_func;
+
     return result;
 }
 

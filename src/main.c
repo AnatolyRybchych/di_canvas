@@ -16,11 +16,14 @@ int main(void){
     //di_stroke_circle(&canvas, DI_POINT(200, 200), 80, DI_COLOR_GREEN);
     di_fill_circle(&canvas, DI_POINT(200, 200), 80, DI_COLOR_GREEN);
 
-    int err = di_dump_bmp(&canvas, "dump.bmp");
+    DiCanvas copy = di_alloc_canvas_copy(&canvas);
+
+    int err = di_dump_bmp(&copy, "dump.bmp");
     if(err){
         fprintf(stderr, "ERROR: %s\n", strerror(err));
     }
     di_free_canvas(&canvas);
+    di_free_canvas(&copy);
 
     return err;
 }
