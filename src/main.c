@@ -13,7 +13,8 @@ int main(void){
 
     //di_draw_triangle(&canvas, DI_POINT(100, 100), DI_POINT(400, 300), DI_POINT(250, 500), DI_COLOR_GREEN);
 
-    di_stroke_circle(&canvas, DI_POINT(200, 200), 80, DI_COLOR_GREEN);
+    //di_stroke_circle(&canvas, DI_POINT(200, 200), 80, DI_COLOR_GREEN);
+    di_fill_circle(&canvas, DI_POINT(200, 200), 80, DI_COLOR_GREEN);
 
     int err = di_dump_bmp(&canvas, "dump.bmp");
     if(err){

@@ -228,6 +228,22 @@ void di_stroke_circle(DiCanvas *canvas, DiPoint p, uint32_t r, DiColor color){
     }
 }
 
+void di_fill_circle(DiCanvas *canvas, DiPoint p, uint32_t r, DiColor color){
+    assert(canvas != NULL);
+    
+    for (int circle_x = -r; circle_x <= (int)r; circle_x++){
+        int circle_y = sqrtf(r*r - circle_x*circle_x);
+        int x = circle_x + p.x;
+        int y1 = circle_y + p.y;
+        int y2 = -circle_y + p.y;
+        
+        while (y1 >= y2){
+            canvas->blend_func(&DI_PIXEL_SAFE(*canvas, x, y1), &color);
+            y1--;
+        }
+    }
+}
+
 DiPoint *di_nearest_to(const DiPoint *target, DiPoint *p1, DiPoint *p2){
     assert(target != NULL);
     assert(p1 != NULL);
